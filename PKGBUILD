@@ -32,6 +32,7 @@ source=(git+https://github.com/$_user/$_kernelrepo.git#branch=$_kernelbranch
         git+https://github.com/$_user/$_overlayrepo.git#branch=$_overlaybranch
         git+https://github.com/$_user-repo/$_bsprepo.git#branch=$_bspbranch
         'linux.preset'
+        'kernel_config'
         'extlinux.arch.template'
         '0001-VENDOR-Add-Radxa-overlays.patch'
         '0002-Fix-dangling-pointer-compiler-bug.patch'
@@ -56,6 +57,7 @@ b2sums=('SKIP'
         'SKIP'
         'SKIP'
         'bd296f775df973c6dcb6bd8311ce4d3af9a8d4a67905f17c450cae776aab0229987d473334d38fd102a34ed483a121f67ac58a48fd9e6fab2c714c7079e06613'
+        '3dd5229d0b171cada8c72dd2a34525febd3c7674b9757af471c1972082d949ec31ffff6b5eefde2d9366158570692ab111cd3bf65c1cf382c4c464077d89c8c8'
         'd8208257c8f2e23a9dbcf2a1bbd11b5a638679cd49dd03d4ea190d1ecd94e2760cccb2cd1cda890816a9c338ce2f38c859961f4ab3a22fca458a453ca0d5f2fc'
         '4908b5a94c02a4eb0fe8bb9983289f1b8acbb1b8ebb541643c7ec4ac5de87be949efbdec839d34603b045500b13033f836385bdbf3e935fcd8d221f71028d604'
         'e612cf028aaf8f99c2735a6e1640170af51e62aa86a8cc795694ac089b2f31be93e67c6ee394cd22d290a787cd9f064861b0bb173033069710881280432ad45f'
@@ -117,7 +119,7 @@ prepare() {
       scripts/kconfig/merge_config.sh -m .config ../bsp/$kconfig    
     done
     scripts/kconfig/merge_config.sh -m .config ../bsp/linux/rockchip/kconfig.conf
-    
+    scripts/kconfig/merge_config.sh -m .config ../kernel_config
   fi
 
   # fix distcc build which does not support gcc plugins
