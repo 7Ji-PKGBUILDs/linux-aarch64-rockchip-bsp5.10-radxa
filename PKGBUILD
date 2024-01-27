@@ -8,7 +8,7 @@ _user="radxa"
 _kernel=linux-radxa-rkbsp5
 pkgbase=$_kernel-git
 pkgname=("${pkgbase}-headers" $pkgbase)
-pkgver=5.10.1081155.fd3f36034325
+pkgver=5.10.1081301.850ebe4784af
 blobcommit="9869c5a8aa0c103efac5a5d5eefe03468a6b8396"
 fwcommit="488f49467f5b4adb8ae944221698e9a4f9acb0ed"
 pkgrel=1
@@ -51,6 +51,7 @@ source=(git+https://github.com/$_user/$_kernelrepo.git#branch=$_kernelbranch
         '0022-dma-buf-Add-an-API-for-importing-sync-files-v10.patch'
         '0023-make-4-4-silence.patch'
         '0024-rga3_uncompact_fix.patch'
+        '0025-vop2_rgba2101010_capability_fix.patch'
         )
 
 b2sums=('SKIP'
@@ -75,7 +76,8 @@ b2sums=('SKIP'
         'b9eb4d0856adc68350dba4d7a8076cddddf97061244cd9aea422c549f2dd2f1f951087835ee957ce0117bf468f0d3068d7f52ce5f486ce00263101af4ab2ba68'
         'eccbf9cf7efd9f5e4f0d12fc59b7f86e1a212ef35e99250f9bc836efe675b1abd81c8997994c8986aa5ec1886e6908abd13473e57523846a15a355fa13beeec7'
         '786a02f742015903c6c6fd852552d272912f4740e15847618a86e217f71f5419d25e1031afee585313896444934eb04b903a685b1448b755d56f701afe9be2ce'
-        'b9d177486c7c80539a267bb37adb3cf7d70c20d5f58e1e39d20c36cced69e2210e6120ebf88befeaf075b05731f5321eb3048ec9ef1518b93ecec882a3e33fcb')
+        'b9d177486c7c80539a267bb37adb3cf7d70c20d5f58e1e39d20c36cced69e2210e6120ebf88befeaf075b05731f5321eb3048ec9ef1518b93ecec882a3e33fcb'
+        'dffe835d816dab78fadaa62a1b561b4d3dd172a4fc8bb2f858957da2858f73b0f32c7458166ab5d5ed41b4aed96e9fb86a40dd4ec75b76ece54850521c9c7d26')
 
 
 pkgver(){
