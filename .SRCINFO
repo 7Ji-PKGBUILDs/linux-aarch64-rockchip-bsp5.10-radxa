@@ -1,4 +1,4 @@
-pkgbase = linux-radxa-rkbsp5-git
+pkgbase = linux-aarch64-rockchip-bsp5.10-radxa-git
 	pkgdesc = Latest git Linux kernel package based on 5.10.x BSP kernel published by RADXA targetting rk3399 based rock4 and rk3588 based rock5 boards
 	pkgver = 5.10.1081301.850ebe4784af
 	pkgrel = 1
@@ -64,6 +64,6 @@ pkgbase = linux-radxa-rkbsp5-git
 	b2sums = b9d177486c7c80539a267bb37adb3cf7d70c20d5f58e1e39d20c36cced69e2210e6120ebf88befeaf075b05731f5321eb3048ec9ef1518b93ecec882a3e33fcb
 	b2sums = dffe835d816dab78fadaa62a1b561b4d3dd172a4fc8bb2f858957da2858f73b0f32c7458166ab5d5ed41b4aed96e9fb86a40dd4ec75b76ece54850521c9c7d26
 
-pkgname = linux-radxa-rkbsp5-git-headers
+pkgname = linux-aarch64-rockchip-bsp5.10-radxa-git-headers
 
-pkgname = linux-radxa-rkbsp5-git
+pkgname = linux-aarch64-rockchip-bsp5.10-radxa-git

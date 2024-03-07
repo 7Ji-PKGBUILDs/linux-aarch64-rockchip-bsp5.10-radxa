@@ -5,7 +5,7 @@
 buildarch=8
 _pkgver=5.10
 _user="radxa"
-_kernel=linux-radxa-rkbsp5
+_kernel=linux-aarch64-rockchip-bsp5.10-radxa
 pkgbase=$_kernel-git
 pkgname=("${pkgbase}-headers" $pkgbase)
 pkgver=5.10.1081301.850ebe4784af
@@ -136,8 +136,8 @@ build() {
   _version="${_version/"$_pkgver"/}"
   _version="${_version//\./-}"
   sed  -i "5s/.*/EXTRAVERSION = ${_version}/" Makefile
-  echo "-radxa-rkbsp" > .scmversion
-  # should result in kernelmaj.kernelmin.patchver-totalcommitnum-hashofkernel-radxa-rkbsp
+  echo "-radxa" > .scmversion
+  # should result in kernelmaj.kernelmin.patchver-totalcommitnum-hashofkernel-radxa
  
   make olddefconfig prepare
   make -s kernelrelease > version
@@ -150,7 +150,7 @@ _package-git() {
   pkgdesc="Latest Git Linux kernel based on 5.10.x BSP published by RADXA targetting rk3399 based rock4 and rk3588 based rock5 boards"
   depends=('coreutils' 'kmod' 'mkinitcpio>=0.7' 'mali-valhall-g610-firmware')
   optdepends=('wireless-regdb: to set the correct wireless channels of your country')
-  provides=("linux=${pkgver}" "linux-rkbsp")
+  provides=("linux=${pkgver}")
   conflicts=('linux')
   backup=("etc/mkinitcpio.d/${_kernel}.preset")
 
@@ -190,7 +190,7 @@ _package-git() {
 _package-git-headers() {
   pkgdesc="Latest Git Linux kernel headers based on 5.10.x BSP published by RADXA targetting rk3399 based rock4 and rk3588 based rock5 boards"
   depends=("python")
-  provides=("linux-headers=${pkgver}" "linux-rkbsp-headers")
+  provides=("linux-headers=${pkgver}")
   conflicts=('linux-headers')
 
   cd kernel
