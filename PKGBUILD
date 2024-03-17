@@ -2,15 +2,12 @@
 # Maintainer: Mahmut Dikcizgi <boogiepop a~t gmx com>
 # Contributor: Kevin Mihelich <kevin@archlinuxarm.org>
 
-buildarch=8
 _pkgver=5.10
 _user="radxa"
 _kernel=linux-aarch64-rockchip-bsp5.10-radxa
 pkgbase=$_kernel-git
 pkgname=("${pkgbase}-headers" $pkgbase)
-pkgver=5.10.1081301.850ebe4784af
-blobcommit="9869c5a8aa0c103efac5a5d5eefe03468a6b8396"
-fwcommit="488f49467f5b4adb8ae944221698e9a4f9acb0ed"
+pkgver=5.10.1082079.6e429d80da
 pkgrel=1
 arch=('aarch64')
 license=('GPL2')
@@ -22,18 +19,18 @@ _kernelbranch=linux-5.10-gen-rkr4.1
 _overlaybranch=main
 _bspbranch="main"
 pkgdesc="Latest git Linux kernel package based on 5.10.x BSP kernel published by RADXA targetting rk3399 based rock4 and rk3588 based rock5 boards" 
-makedepends=('xmlto' 'docbook-xsl' 'kmod' 'inetutils' 'bc' 'git' 'uboot-tools' 'vboot-utils' 'dtc')
+makedepends=('xmlto' 'docbook-xsl' 'kmod' 'inetutils' 'bc' 'git' 'uboot-tools' 'dtc' 'python')
 options=('!strip')
 
 # Patch1-10 comes from Radxa: https://github.com/radxa-repo/bsp/tree/main/linux/rockchip
 # Patch11: Warning Supressions for buildsystem not to quit including DistCC builds
 # Patch12: Force Enabling AV1 decoder in 3588. This may be implemented in radxa git as well soon
-source=(git+https://github.com/$_user/$_kernelrepo.git#branch=$_kernelbranch
-        git+https://github.com/$_user/$_overlayrepo.git#branch=$_overlaybranch
-        git+https://github.com/$_user-repo/$_bsprepo.git#branch=$_bspbranch
-        'linux.preset'
+
+source=("git+https://github.com/$_user/$_kernelrepo.git#branch=$_kernelbranch"
+        "git+https://github.com/$_user/$_overlayrepo.git#branch=$_overlaybranch"
+        "git+https://github.com/$_user-repo/$_bsprepo.git#branch=$_bspbranch"
         'kernel_config'
-        'extlinux.arch.template'
+        'extlinux.radxa.template'
         '0001-VENDOR-Add-Radxa-overlays.patch'
         '0002-Fix-dangling-pointer-compiler-bug.patch'
         '0003-Disable-tristate-for-non-modules.patch'
@@ -57,9 +54,8 @@ source=(git+https://github.com/$_user/$_kernelrepo.git#branch=$_kernelbranch
 b2sums=('SKIP'
         'SKIP'
         'SKIP'
-        'bd296f775df973c6dcb6bd8311ce4d3af9a8d4a67905f17c450cae776aab0229987d473334d38fd102a34ed483a121f67ac58a48fd9e6fab2c714c7079e06613'
         '3dd5229d0b171cada8c72dd2a34525febd3c7674b9757af471c1972082d949ec31ffff6b5eefde2d9366158570692ab111cd3bf65c1cf382c4c464077d89c8c8'
-        '9e25267fdabb22fd44dac55e386c325db101a669100ae2da25c8fbe0d83a1232fbc9e628ab4a4f9493b9c9b742596f53ecef9b141dd0d602c7f42c6031305f46'
+        '6589d8de3ca07a2d354a3135a39f78e9b9889267c0863e7db274ca9345c53a4eb60efb861b15fb11ebef7a8eac7af5ad74a8cb9f9fb65d92e3718e04818b59ca'
         '4908b5a94c02a4eb0fe8bb9983289f1b8acbb1b8ebb541643c7ec4ac5de87be949efbdec839d34603b045500b13033f836385bdbf3e935fcd8d221f71028d604'
         'e612cf028aaf8f99c2735a6e1640170af51e62aa86a8cc795694ac089b2f31be93e67c6ee394cd22d290a787cd9f064861b0bb173033069710881280432ad45f'
         'bde631de66dde60339c7fa306b06a9100ac41adaeb16788c800157324a288a97629c41dda5076698c1ef71b8b7f44b5eba619b6aac92d0d5c59e796fb2aa407a'
@@ -81,7 +77,7 @@ b2sums=('SKIP'
 
 
 pkgver(){
-  #gets the commit count of both repos + _pkgrel and sums them to calculate the revision number
+  # gets the commit count of both repos + _pkgrel and sums them to calculate the revision number
   cd overlays
   local _ocommits="$(git rev-list --count HEAD arch/arm64/boot/dts/rockchip)"
   cd ../bsp
@@ -99,6 +95,7 @@ pkgver(){
 prepare() {
   cd kernel
   cp -rf ../overlays/arch .
+
   # patch with radxa patches and dont care if they fail
   for p in ../*.patch; do
     echo "Patching with ${p}"
@@ -110,6 +107,10 @@ prepare() {
     echo "Custom Patching with ${p}"
     patch -p1 -N -i $p || true
   done
+
+  echo "Setting version..."
+  echo "-$pkgrel" > localversion.10-pkgrel
+  echo "${pkgbase#linux}" > localversion.20-pkgname
 
   if [ -f ../../custom/config ]; then
     echo "Using User Specific Config"
@@ -123,79 +124,53 @@ prepare() {
     scripts/kconfig/merge_config.sh -m .config ../bsp/linux/rockchip/kconfig.conf
     scripts/kconfig/merge_config.sh -m .config ../kernel_config
   fi
-
-  # fix distcc build which does not support gcc plugins
-  sed -i 's/CONFIG_GCC_PLUGINS=y/CONFIG_GCC_PLUGINS=n/g' .config
-  
+ 
+  make olddefconfig prepare
+  make -s kernelrelease > version
+  echo "Prepared for $(<version)"
 }
 
 build() {
   cd kernel
 
-  local _version="$(<pkgver)"
-  _version="${_version/"$_pkgver"/}"
-  _version="${_version//\./-}"
-  sed  -i "5s/.*/EXTRAVERSION = ${_version}/" Makefile
-  echo "-radxa" > .scmversion
-  # should result in kernelmaj.kernelmin.patchver-totalcommitnum-hashofkernel-radxa
- 
-  make olddefconfig prepare
-  make -s kernelrelease > version
   unset LDFLAGS
   make ${MAKEFLAGS} Image modules
   make ${MAKEFLAGS} DTC_FLAGS="-@" dtbs
 }
 
-_package-git() {
-  pkgdesc="Latest Git Linux kernel based on 5.10.x BSP published by RADXA targetting rk3399 based rock4 and rk3588 based rock5 boards"
-  depends=('coreutils' 'kmod' 'mkinitcpio>=0.7' 'mali-valhall-g610-firmware')
+_package() {
+  pkgdesc="The linux kernel, ${_desc}"
+  depends=('coreutils' 'kmod' 'initramfs')
   optdepends=('wireless-regdb: to set the correct wireless channels of your country')
-  provides=("linux=${pkgver}")
-  conflicts=('linux')
-  backup=("etc/mkinitcpio.d/${_kernel}.preset")
 
   cd kernel
-  
-  local _version="$(<version)"
   
   # install dtbs
-  make INSTALL_DTBS_PATH="${pkgdir}/boot/dtbs/$_kernel" dtbs_install
-
+  make INSTALL_DTBS_PATH="${pkgdir}/boot/dtbs/${_kernel}" dtbs_install
+  
   # install extlinux template
-  install -Dm644 ../extlinux.arch.template "$pkgdir/boot/extlinux/extlinux.arch.template"
+  install -Dm644 ../extlinux.radxa.template "$pkgdir/boot/extlinux/extlinux.radxa.template"
   
   # install modules
-  make INSTALL_MOD_PATH="$pkgdir/usr" INSTALL_MOD_STRIP=1 modules_install
-
+  make INSTALL_MOD_PATH="${pkgdir}/usr" INSTALL_MOD_STRIP=1 modules_install
+  
   # copy kernel
-  install -Dm644 arch/arm64/boot/Image "$pkgdir/usr/lib/modules/$_version/vmlinuz"
+  local _dir_module="${pkgdir}/usr/lib/modules/$(<version)"
+  install -Dm644 arch/arm64/boot/Image "${_dir_module}/vmlinuz"
 
-  # remove build and source links
-  rm "$pkgdir/usr/lib/modules/$_version"/{source,build}
+  # Install pkgbase
+  echo "${_kernel}" | install -D -m 644 /dev/stdin "${_dir_module}/pkgbase"
 
-  # sed expression for following substitutions
-  local _subst="
-    s|%PKGBASE%|${_kernel}|g
-    s|%KERNVER%|${_version}|g
-  "
-
-  # used by mkinitcpio to name the kernel
-  echo "$_kernel" | install -Dm644 /dev/stdin "$pkgdir/usr/lib/modules/$_version/pkgbase"
-
-  # install mkinitcpio preset file
-  sed "$_subst" ../linux.preset |
-    install -Dm644 /dev/stdin "$pkgdir/etc/mkinitcpio.d/$_kernel.preset"
+  # remove reference to build host
+  rm -f "${_dir_module}/"{build,source}
 }
 
-_package-git-headers() {
-  pkgdesc="Latest Git Linux kernel headers based on 5.10.x BSP published by RADXA targetting rk3399 based rock4 and rk3588 based rock5 boards"
+_package-headers() {
+  pkgdesc="Headers and scripts for building modules for the linux kernel, ${_desc}"
   depends=("python")
-  provides=("linux-headers=${pkgver}")
-  conflicts=('linux-headers')
 
   cd kernel
-  local _version="$(<version)"
-  local builddir="$pkgdir/usr/lib/modules/$_version/build"
+  local builddir="${pkgdir}/usr/lib/modules/$(<version)/build"
 
   echo "Installing build files..."
   install -Dt "$builddir" -m644 .config Makefile Module.symvers System.map version
@@ -264,11 +239,12 @@ _package-git-headers() {
 
   echo "Adding symlink..."
   mkdir -p "$pkgdir/usr/src"
-  ln -sr "$builddir" "$pkgdir/usr/src/$_kernel"
+  ln -sr "$builddir" "$pkgdir/usr/src/$pkgbase"
 }
 
 for _p in ${pkgname[@]}; do
   eval "package_${_p}() {
-    _package${_p#${_kernel}}
+    $(declare -f "_package${_p#$pkgbase}")
+    _package${_p#${pkgbase}}
   }"
 done
