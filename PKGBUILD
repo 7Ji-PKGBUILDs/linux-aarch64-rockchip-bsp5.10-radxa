@@ -132,13 +132,13 @@ prepare() {
     scripts/kconfig/merge_config.sh -m .config ../kernel_config
   fi
  
-  make olddefconfig prepare
-  make -s kernelrelease > version
-  echo "Prepared for $(<version)"
 }
 
 build() {
   cd kernel
+
+  make olddefconfig prepare
+  make -s kernelrelease > version
 
   unset LDFLAGS
   make ${MAKEFLAGS} Image modules
