@@ -1,0 +1,13 @@
+diff --git a/Makefile b/Makefile
+index 4231fad..6214026 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1047,6 +1047,8 @@
+ include-$(CONFIG_KCOV)		+= scripts/Makefile.kcov
+ include-$(CONFIG_GCC_PLUGINS)	+= scripts/Makefile.gcc-plugins
+ 
++KBUILD_CFLAGS += $(call cc-disable-warning, enum-int-mismatch)
++
+ include $(addprefix $(srctree)/, $(include-y))
+ 
+ # scripts/Makefile.gcc-plugins is intentionally included last.
