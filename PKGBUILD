@@ -2,9 +2,9 @@
 # Maintainer: Mahmut Dikcizgi <boogiepop a~t gmx com>
 # Contributor: Kevin Mihelich <kevin@archlinuxarm.org>
 
-_pkgver=5.10
+_pkgver=6.1
 _user="radxa"
-_kernel=linux-aarch64-rockchip-bsp5.10-radxa
+_kernel=linux-aarch64-rockchip-bsp6.1-radxa
 pkgbase=$_kernel-git
 pkgname=("${pkgbase}-headers" $pkgbase)
 pkgver=5.10.1082079.6e429d80da
@@ -13,30 +13,21 @@ arch=('aarch64')
 license=('GPL2')
 url="https://github.com/${_user}"
 _kernelrepo="kernel"
-_overlayrepo="overlays"
 _bsprepo="bsp"
-_kernelbranch=linux-5.10-gen-rkr4.1
-_overlaybranch=main
+_kernelbranch=linux-6.1-stan-rkr4.1
 _bspbranch="main"
-pkgdesc="Latest git Linux kernel package based on 5.10.x BSP kernel published by RADXA targetting rk3399 based rock4 and rk3588 based rock5 boards" 
+pkgdesc="Latest git Linux kernel package from Radxa targetting Rock5 boards" 
 makedepends=('xmlto' 'docbook-xsl' 'kmod' 'inetutils' 'bc' 'git' 'uboot-tools' 'dtc' 'python' 'gitweb-dlagent')
 options=('!strip')
 
 DLAGENTS+=('gitweb-dlagent::/usr/bin/gitweb-dlagent sync %u')
 _url_kernel=gitweb-dlagent://github.com/$_user/$_kernelrepo#branch=$_kernelbranch
-_url_overlay=gitweb-dlagent://github.com/$_user/$_overlayrepo.git#branch=$_overlaybranch
 _url_bsp=gitweb-dlagent://github.com/$_user-repo/$_bsprepo.git#branch=$_bspbranch   
 
-# Patch1-10 comes from Radxa: https://github.com/radxa-repo/bsp/tree/main/linux/rockchip
-# Patch11: Warning Supressions for buildsystem not to quit including DistCC builds
-# Patch12: Force Enabling AV1 decoder in 3588. This may be implemented in radxa git as well soon
-
 source=("$_url_kernel"
-        "$_url_overlay"
         "$_url_bsp"
         'kernel_config'
         'extlinux.radxa.template'
-        '1001-disable_warnings.patch'
         '1002-rga3_uncompact_fix.patch'
         '1003-vop2_rgba2101010_capability_fix.patch'
         )
@@ -54,7 +45,7 @@ pkgver(){
   
   # the dts changes do not need to be counted as a revision to prevent too frequent updates 
   local _kcommits=$(gitweb-dlagent version ${_url_kernel} --pattern \{revision\})
-  local _khash=$(gitweb-dlagent version ${_url_kernel} --pattern \{commit:.10s\})
+  local _khash=$(gitweb-dlagent version ${_url_kernel} --pattern \{commit:.8s\})
 
   local _revnum=$(($_kcommits + $_ocommits + $_bcommits + $pkgrel))
   local _version="${_pkgver}.${_revnum}.${_khash}"
